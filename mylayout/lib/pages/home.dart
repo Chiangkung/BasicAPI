@@ -4,8 +4,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:mylayout/pages/detail.dart';
 
+import 'package:http/http.dart' as http;
+import 'dart:async';
+
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  // const HomePage({Key? key}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -20,17 +23,18 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(20), // ให้ขอบห่างจากขอบ 20 pixels
-        child: FutureBuilder( builder: (context, snapshot) {
-            var data = json.decode(snapshot.data.toString()); // [{คอมพิวเตอร์คืออะไร...},{},{},{}]
+        child: FutureBuilder( builder: (context, AsyncSnapshot snapshot) {
+            //var data = json.decode(snapshot.data.toString()); // [{คอมพิวเตอร์คืออะไร...},{},{},{}]
             return ListView.builder( //คล้ายการวน loop
               itemBuilder: (BuildContext context, int index) {
-                return MyBox(data[index]['title'], data[index]['subtitle'], data[index]['image_url'], data[index]['detail']);
+                return MyBox(snapshot.data[index]['title'], snapshot.data[index]['subtitle'], snapshot.data[index]['image_url'], snapshot.data[index]['detail']);
 
               },
-              itemCount: data.length, );
+              itemCount: snapshot.data.length, );
 
         },
-        future: DefaultAssetBundle.of(context).loadString('assets/data.json'), 
+        future: getData(),
+        // future: DefaultAssetBundle.of(context).loadString('assets/data.json'), 
 
         )
  
@@ -84,5 +88,17 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
+
+  Future getData() async {  // async คือ function ที่ต้องใช้เวลา download
+    // https://raw.githubusercontent.com/Chiangkung/BasicAPI/main/data.json
+    var url = Uri.https('raw.githubusercontent.com','/Chiangkung/BasicAPI/main/data.json');
+    var response = await http.get(url);
+    var result = json.decode(response.body);
+    return result;
+  }
+
+
+
 }
 
